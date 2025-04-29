@@ -33,10 +33,7 @@ package com.sit.simpleissuetracker.modals;
 
 import com.sit.simpleissuetracker.modals.Role;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -48,6 +45,7 @@ import java.util.Set;
 @Table(name = "users") // "users" instead of "user" to avoid reserved keyword issues
 @Getter
 @Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class User {
