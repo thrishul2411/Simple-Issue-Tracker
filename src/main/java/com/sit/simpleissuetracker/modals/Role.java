@@ -9,7 +9,7 @@ import lombok.Data;
 public class Role {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, unique = true, length = 50)
     private RoleName name;
