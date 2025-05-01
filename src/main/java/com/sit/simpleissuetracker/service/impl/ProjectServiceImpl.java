@@ -4,6 +4,7 @@ import com.sit.simpleissuetracker.dto.ProjectRequest;
 import com.sit.simpleissuetracker.dto.ProjectResponse;
 import com.sit.simpleissuetracker.exception.ResourceNotFoundException;
 import com.sit.simpleissuetracker.modals.Project;
+import com.sit.simpleissuetracker.modals.RoleName;
 import com.sit.simpleissuetracker.modals.User;
 import com.sit.simpleissuetracker.repository.IssueRepository;
 import com.sit.simpleissuetracker.repository.ProjectRepository;
@@ -12,6 +13,7 @@ import com.sit.simpleissuetracker.service.ProjectService;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException; // Can be thrown by getCurrentUser
@@ -79,9 +81,9 @@ public class ProjectServiceImpl implements ProjectService {
                 .orElseThrow(() -> new ResourceNotFoundException("Project not found with ID: " + projectId));
 
         // Add authorization logic here if needed:
-        // if (!existingProject.getOwner().getId().equals(currentUser.getId()) /* && !isUserAdmin(currentUser) */ ) {
-        //     throw new AccessDeniedException("User does not have permission to update this project");
-        // }
+         if (!existingProject.getOwner().getId().equals(currentUser.getId()) && !isUserAdmin(currentUser)) {
+             throw new AccessDeniedException("User does not have permission to update this project");
+         }
 
         existingProject.setName(projectRequest.getName());
         existingProject.setDescription(projectRequest.getDescription());
@@ -96,19 +98,20 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     @Transactional
     public void deleteProject(Long projectId) throws ResourceNotFoundException {
-        // Authorization check should happen here or in Controller using @PreAuthorize
         User currentUser = getCurrentUser();
         log.warn("User '{}' attempting to DELETE project with ID: {}", currentUser.getEmail(), projectId);
 
         Project projectToDelete = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Project not found with ID: " + projectId));
 
-        // Add authorization logic here if needed (similar to update)
+        if (!projectToDelete.getOwner().getId().equals(currentUser.getId()) && !isUserAdmin(currentUser)) {
+            throw new AccessDeniedException("User does not have permission to update this project");
+        }
 
         // --- Deletion Constraint Check (Example) ---
-        // Decide what happens if a project has issues. Your FR-PRJ-04 was TBD.
+        // Decide what happens if a project has issues.
         // Option 1: Prevent deletion if issues exist
-        long issueCount = issueRepository.countByProjectId(projectId); // Need countByProjectId method in IssueRepository
+        long issueCount = issueRepository.countByProjectId(projectId);
         if (issueCount > 0) {
             log.error("Deletion failed: Project {} cannot be deleted because it contains {} issues.", projectId, issueCount);
             // Use a specific exception or BadRequestException
@@ -117,14 +120,13 @@ public class ProjectServiceImpl implements ProjectService {
 
         // Option 2: Allow deletion (requires cascade settings on Project entity's issues field)
         // If Project entity has `@OneToMany(mappedBy = "project", cascade = CascadeType.REMOVE)`
-        // Then deleting the project will automatically delete its issues. Be careful!
+        // Then deleting the project will automatically delete its issues.
 
         // Proceed with deletion if checks pass
         projectRepository.delete(projectToDelete);
         log.warn("Project with ID {} deleted successfully by user '{}'.", projectId, currentUser.getEmail());
     }
 
-    // --- Helper: Get Current Authenticated User ---
     private User getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getPrincipal())) {
@@ -164,6 +166,10 @@ public class ProjectServiceImpl implements ProjectService {
         return response;
     }
 
-    // Helper method for IssueRepository (add this to IssueRepository interface)
-    // long countByProjectId(Long projectId);
+    private boolean isUserAdmin(User user) {
+        // Check if the user's roles collection contains the ROLE_ADMIN
+        return user.getRoles().stream()
+                .anyMatch(role -> role.getName().equals(RoleName.ROLE_ADMIN));
+    }
+
 }

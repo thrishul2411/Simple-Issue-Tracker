@@ -16,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional; // Important fo
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@Service // Mark this as a Spring service component
+@Service
 @RequiredArgsConstructor
 public class UserDetailsServiceImpl implements UserDetailsService {
 

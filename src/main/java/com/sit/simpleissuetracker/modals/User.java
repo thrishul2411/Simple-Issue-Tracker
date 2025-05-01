@@ -1,37 +1,6 @@
-//
-//
-//import jakarta.persistence.*;
-//import lombok.Data;
-//import org.hibernate.annotations.CreationTimestamp;
-//import org.hibernate.annotations.UpdateTimestamp;
-//
-//import java.time.LocalDate;
-//import java.util.HashSet;
-//import java.util.Set;
-//
-//@Entity
-//@Data
-//@Table(name = "users")
-//public class User {
-//    @Id
-//    @GeneratedValue(strategy = GenerationType.IDENTITY)
-//    public Integer id;
-//    public String firstName;
-//    public String lastName;
-//    public String email;
-//    public String password;
-//    @CreationTimestamp
-//    public LocalDate createdAt;
-//    @UpdateTimestamp
-//    public LocalDate updatedAt;
-//    @ManyToMany
-//    public Set<Role> roles = new HashSet<>();
-//
-//}
 
 package com.sit.simpleissuetracker.modals;
 
-import com.sit.simpleissuetracker.modals.Role;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -45,7 +14,6 @@ import java.util.Set;
 @Table(name = "users") // "users" instead of "user" to avoid reserved keyword issues
 @Getter
 @Setter
-@Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class User {

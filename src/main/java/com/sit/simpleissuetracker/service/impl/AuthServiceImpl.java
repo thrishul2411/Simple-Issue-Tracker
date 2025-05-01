@@ -80,7 +80,7 @@ public class AuthServiceImpl implements AuthService {
                 .map(role -> role.getName().name()) // Get enum name as String
                 .collect(Collectors.toSet());
         userResponse.setRoles(roleNames);
-        userResponse.setCreatedAt(user.getCreatedAt()); // Assuming User entity has @CreationTimestamp
+        userResponse.setCreatedAt(user.getCreatedAt());
         return userResponse;
     }
 }
