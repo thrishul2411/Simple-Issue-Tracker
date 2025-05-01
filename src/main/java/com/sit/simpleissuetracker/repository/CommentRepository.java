@@ -9,4 +9,10 @@ import java.util.List;
 @Repository
 public interface CommentRepository extends JpaRepository<Comment, Long> {
     public List<Comment> findByIssueIdOrderByCreatedAtAsc(Long issueId);
+    /**
+     * Counts the number of comments associated with a specific issue.
+     * @param issueId The ID of the issue.
+     * @return The count of comments for that issue.
+     */
+    long countByIssueId(Long issueId);
 }
